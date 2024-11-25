@@ -1,0 +1,23 @@
+version: "3"
+
+services:
+
+  backend:
+    build:
+      context: ./backend/
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    restart: always
+
+  frontend:
+    build:
+      context: ./frontend/
+      dockerfile: Dockerfile
+      args:
+        REPO_URL: https://github.com/vikadmin88/client-app.git
+    ports:
+      - "3001:80"
+    restart: always
+    depends_on:
+      - backend
