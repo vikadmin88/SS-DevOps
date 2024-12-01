@@ -1,1 +1,1 @@
-# ss-devops
+# SS-DevOps practice
