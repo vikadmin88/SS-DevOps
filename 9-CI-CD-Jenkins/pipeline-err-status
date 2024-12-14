@@ -1,0 +1,42 @@
+pipeline {
+    agent any
+
+    triggers {
+        // Schedule the job to run every 10 minutes
+        cron('H/15 * * * *')
+    }
+
+    stages {
+        stage('Check Apache Logs') {
+            steps {
+                // Check for 4xx and 5xx errors
+                sh """
+                    # Define the log file path
+                    logFile=''
+                    logFileDeb='/var/log/apache2/access.log'
+                    logFileRhn='/var/log/httpd/access_log'
+
+                    if [ -f "\${logFileDeb}" ]; then
+                        logFile="\${logFileDeb}"
+                    elif [ -f "\${logFileRhn}" ]; then
+                        logFile="\${logFileRhn}"
+                    else
+                        echo "Log file does not exist!"
+                        exit 1
+                    fi
+
+                    echo "Checking for 4xx and 5xx errors in \${logFile}..."
+                    ERRORS=\$(grep -E ' [45][0-9]{2} ' "\${logFile}" 2>&1 || true)
+
+                    if [ -z "\${ERRORS}" ]; then
+                        echo "No 4xx/5xx errors found."
+                    else
+                        echo "Found the following 4xx/5xx errors:"
+                        echo "\${ERRORS}" | head -n 10
+                        exit 1
+                    fi                     
+                """
+            }
+        }
+    }
+}
