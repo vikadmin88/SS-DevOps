@@ -1,5 +1,5 @@
 pipeline {
-    agent apache-server
+    agent { label 'apache-server' }
 
     stages {
 
