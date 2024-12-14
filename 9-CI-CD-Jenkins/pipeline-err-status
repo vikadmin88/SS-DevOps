@@ -1,5 +1,5 @@
 pipeline {
-    agent any
+    agent apache-server
 
     triggers {
         // Schedule the job to run every 10 minutes

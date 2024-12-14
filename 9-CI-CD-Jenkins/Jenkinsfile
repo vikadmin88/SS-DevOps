@@ -1,5 +1,5 @@
 pipeline {
-    agent any
+    agent apache-server
 
     stages {
 
