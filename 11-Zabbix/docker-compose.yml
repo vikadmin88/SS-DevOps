@@ -1,0 +1,63 @@
+version: '3.8'
+
+networks:
+  zabbix-network:
+    driver: bridge
+    # ipam:
+    # config:
+    #   - subnet: 192.168.100.0/24
+
+services:
+  db:
+    container_name: zbx-mysql
+    image: mysql:8.4
+    environment:
+      - MYSQL_ROOT_PASSWORD=secret
+      # - MYSQL_DATABASE=zabbix
+      # - MYSQL_USER=zabbix
+      # - MYSQL_PASSWORD=zabbix
+    volumes:
+      - ./data:/var/lib/mysql
+    ports:
+      - "3306:3306"
+    networks:
+      - zabbix-network
+    restart: always
+
+  zabbix-server:
+    container_name: zabbix-server-mysql
+    image: zabbix/zabbix-server-mysql:ubuntu-6.4-latest
+    environment:
+      - DB_SERVER_HOST=db
+      - MYSQL_ROOT_PASSWORD=secret
+      - MYSQL_USER=zabbix
+      - MYSQL_PASSWORD=zabbix
+    depends_on:
+      - db
+    ports:
+      - "10051:10051"
+    networks:
+      - zabbix-network
+    init: true
+    restart: always
+
+  zabbix-web:
+    container_name: zabbix-web-nginx-mysql
+    image: zabbix/zabbix-web-nginx-mysql:ubuntu-6.4-latest
+    environment:
+      - DB_SERVER_HOST=db
+      - MYSQL_ROOT_PASSWORD=secret
+      - MYSQL_USER=zabbix
+      - MYSQL_PASSWORD=zabbix
+      - ZBX_SERVER_HOST=zabbix-server
+      - PHP_TZ=Europe/Kyiv
+    depends_on:
+      - db
+      - zabbix-server
+    ports:
+      - "8088:8080"
+      - "8443:8443"
+    networks:
+      - zabbix-network
+    restart: always
+
